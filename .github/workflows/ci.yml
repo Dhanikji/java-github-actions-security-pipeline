@@ -1,0 +1,51 @@
+
+name: Java Docker CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and Test Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Compile Java Application
+        run: |
+          mkdir -p out
+          javac -d out src/HelloWorld.java
+
+      - name: Test Java Application
+        run: |
+          output=$(java -cp out HelloWorld)
+          echo "$output"
+          echo "$output" | grep -Fq "Hello World!"
+          echo "$output" | grep -Fq "Welcome to GitHub Actions CI/CD Pipeline."
+
+      - name: Build Docker Image
+        run: |
+          docker build -t java-hello-world:${{ github.sha }} .
+
+      - name: Test Docker Container
+        run: |
+          output=$(docker run --rm java-hello-world:${{ github.sha }})
+          echo "$output"
+          echo "$output" | grep -Fq "Hello World!"
+          echo "$output" | grep -Fq "Welcome to GitHub Actions CI/CD Pipeline."
