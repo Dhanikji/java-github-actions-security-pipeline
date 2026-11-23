@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build-and-test:
-    name: Build and Test Application
+    name: Build, Test and Security Scan
     runs-on: ubuntu-latest
 
     steps:
@@ -43,9 +43,20 @@ jobs:
         run: |
           docker build -t java-hello-world:${{ github.sha }} .
 
+      - name: Scan Docker Image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: java-hello-world:${{ github.sha }}
+          format: table
+          exit-code: '1'
+          severity: HIGH,CRITICAL
+          vuln-type: os,library
+          ignore-unfixed: false
+
       - name: Test Docker Container
         run: |
           output=$(docker run --rm java-hello-world:${{ github.sha }})
           echo "$output"
           echo "$output" | grep -Fq "Hello World!"
           echo "$output" | grep -Fq "Welcome to GitHub Actions CI/CD Pipeline."
+
