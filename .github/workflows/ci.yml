@@ -49,7 +49,7 @@ jobs:
           image-ref: java-hello-world:${{ github.sha }}
           format: table
           exit-code: '1'
-          severity: HIGH,CRITICAL
+          severity: LOW,MEDIUM,HIGH,CRITICAL
           vuln-type: os,library
           ignore-unfixed: false
 
